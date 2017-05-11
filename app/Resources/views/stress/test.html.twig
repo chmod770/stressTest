@@ -1,0 +1,8 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h2 class="page-header">Testy</h2>
+    {% for test in tests %}
+       {{ test.output }}
+    {% endfor %}
+{% endblock %}

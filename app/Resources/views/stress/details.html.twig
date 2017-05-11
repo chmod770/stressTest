@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h2 class="page-header">Testy</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Adres</th>
+            <th>Data</th>
+            <th>Test</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for test in tests %}
+            <tr>
+                <th scope="row">{{ test.id }}</th>
+                <td>{{ test.adress }}</td>
+                <td>{{ test.date|date('F j, Y, g:i a')}}</td>
+                <td style="display: none;" id="{{ test.id }}">{{ test.ab| raw }}</td>
+                <td><div ><button id="btn{{ test.id }}" class="btn btn-info" onclick=info({{ test.id }}) value="+" >+</button></div></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
