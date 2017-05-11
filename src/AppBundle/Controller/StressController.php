@@ -138,6 +138,7 @@ class StressController extends Controller
         $output = str_replace("</p>", '', $output);
         $output = str_replace("..done", '', $output);
         //die($output);
+        $output = trim($output);
 
         $date = new\DateTime('now');
 
