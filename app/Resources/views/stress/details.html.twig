@@ -2,20 +2,130 @@
 
 {% block body %}
     <h2 class="page-header">Testy</h2>
+    {% if tests[0] is defined %}
     <table class="table">
         <thead>
         <tr>
-            <th>Id</th>
             <th>Adres</th>
             <th>Data</th>
             <th>Test</th>
         </tr>
         </thead>
         <tbody>
+                {% set testOld = tests[0] %}
+                {% if tests[1] is defined %}
+                    {% set testNew = tests[1] %}
+                {% else  %}
+                    {% set testNew = tests[0] %}
+                {% endif %}
+            <tr>
+                <td>{{ testOld.adress }}</td>
+                <td>{{ testOld.date|date('F j, Y, g:i a')}}</td>
+                <td style="display: none;" id="test">
+                    <table >
+                        <tr >
+                            <th colspan=2 bgcolor=white>Document Length:</th>
+                            <td colspan=2 {% if testOld.DocumentLength <= testNew.DocumentLength %} bgcolor=#32cd32 {% else %} bgcolor=#D7310C {% endif %}  >
+                                {{ testOld.DocumentLength}} | {{ testNew.DocumentLength}}
+                            </td>
+                        </tr>
+                        <tr >
+                            <th colspan=2 bgcolor=white>Time taken for tests:</th>
+                            <td colspan=2 {% if testOld.Timetakenfortests <= testNew.Timetakenfortests %} bgcolor=#32cd32 {% else %} bgcolor=#D7310C {% endif %}>
+                                {{ testOld.Timetakenfortests }} | {{ testNew.Timetakenfortests }} seconds
+                            </td>
+                        </tr>
+                        <tr ><th colspan=2 bgcolor=white>Complete requests:</th>
+                            <td colspan=2 {% if testOld.Completerequests <= testNew.Completerequests %} bgcolor=#32cd32 {% else %} bgcolor=#D7310C {% endif %}>
+                                {{ testOld.Completerequests }} | {{ testNew.Completerequests }}
+                            </td>
+                        </tr>
+                        <tr >
+                            <th colspan=2 bgcolor=white>Failed requests:</th>
+                            <td colspan=2 {% if testOld.Failedrequests >= testNew.Failedrequests %} bgcolor=#32cd32 {% else %} bgcolor=#D7310C {% endif %}>
+                                {{ testOld.Failedrequests }} | {{ testNew.Failedrequests }}
+                            </td>
+                        </tr>
+                        <tr >
+                            <th colspan=2 bgcolor=white>HTML transferred:</th>
+                            <td colspan=2 {% if testOld.HTMLtransferred >= testNew.HTMLtransferred %} bgcolor=#32cd32 {% else %} bgcolor=#D7310C {% endif %}>
+                                {{ testOld.HTMLtransferred }} | {{ testNew.HTMLtransferred }} bytes
+                            </td>
+                        </tr>
+                        <tr >
+                            <th colspan=2 bgcolor=white>Total transferred:</th>
+                            <td colspan=2 {% if testOld.Totaltransferred >= testNew.Totaltransferred %} bgcolor=#32cd32 {% else %} bgcolor=#D7310C {% endif %}>
+                                {{ testOld.Totaltransferred }} | {{ testNew.Totaltransferred }} bytes
+                            </td>
+                        </tr>
+                        <tr >
+                            <th colspan=2 bgcolor=white>Non2-xxresponses:</th>
+                            <td colspan=2 {% if testOld.Non2xxresponses >= testNew.Non2xxresponses %} bgcolor=#32cd32 {% else %} bgcolor=#D7310C {% endif %}>
+                                {{ testOld.Non2xxresponses }} | {{ testNew.Non2xxresponses }}
+                            </td>
+                        </tr>
+                        <tr >
+                            <th colspan=2 bgcolor=white>Requests per second:</th>
+                            <td colspan=2 {% if testOld.Requestspersecond <= testNew.Requestspersecond %} bgcolor=#32cd32 {% else %} bgcolor=#D7310C {% endif %}>
+                                {{ testOld.Requestspersecond }} | {{ testNew.Requestspersecond }}
+                            </td>
+                        </tr>
+                        <tr >
+                            <th colspan=2 bgcolor=white>Transfer rate:</th>
+                            <td colspan=2 {% if testOld.Transferrate <= testNew.Transferrate %} bgcolor=#32cd32 {% else %} bgcolor=#D7310C {% endif %}>
+                                {{ testOld.Transferrate }} | {{ testNew.Transferrate }} kb/s received
+                            </td>
+                        </tr>
+                        <tr >
+                            <th bgcolor=white colspan=4>Connnection Times (ms)</th>
+                        </tr>
+                        <tr >
+                            <th bgcolor=white>&nbsp;</th>
+                            <th bgcolor=white>min</th>
+                            <th bgcolor=white>avg</th>
+                            <th bgcolor=white>max</th>
+                        </tr>
+                        <tr >
+                            <th bgcolor=white>Connect:</th>
+                            <td {% if testOld.connectMin >= testNew.connectMin %} bgcolor=#32cd32 {% else %} bgcolor=#D7310C {% endif %}>{{ testOld.connectMin }} | {{ testNew.connectMin }}       </td>
+                            <td {% if testOld.connectAvg >= testNew.connectAvg %} bgcolor=#32cd32 {% else %} bgcolor=#D7310C {% endif %}>{{ testOld.connectAvg }} | {{ testNew.connectAvg }}    </td>
+                            <td {% if testOld.connectMax >= testNew.connectMax %} bgcolor=#32cd32 {% else %} bgcolor=#D7310C {% endif %}>{{ testOld.connectMax }} | {{ testNew.connectMax }}     </td>
+                        </tr>
+                        <tr >
+                            <th bgcolor=white>Processing:</th>
+                            <td {% if testOld.processingMin >= testNew.processingMin %} bgcolor=#32cd32 {% else %} bgcolor=#D7310C {% endif %}> {{ testOld.processingMin }} |  {{ testNew.processingMin }}   </td>
+                            <td {% if testOld.processingAvg >= testNew.processingAvg %} bgcolor=#32cd32 {% else %} bgcolor=#D7310C {% endif %}> {{ testOld.processingAvg }} | {{ testNew.processingAvg }}   </td>
+                            <td {% if testOld.processingMax >= testNew.processingMax %} bgcolor=#32cd32 {% else %} bgcolor=#D7310C {% endif %}>{{ testOld.processingMax }} | {{ testNew.processingMax }}    </td>
+                        </tr>
+                        <tr >
+                            <th bgcolor=white>Total:</th>
+                            <td {% if testOld.totalMin >= testNew.totalMin %} bgcolor=#32cd32 {% else %} bgcolor=#D7310C {% endif %}>{{ testOld.totalMin }} | {{ testNew.totalMin }}       </td>
+                            <td {% if testOld.totalAvg >= testNew.totalAvg %} bgcolor=#32cd32 {% else %} bgcolor=#D7310C {% endif %}> {{ testOld.totalAvg }} | {{ testNew.totalAvg }}   </td>
+                            <td {% if testOld.totalMax >= testNew.totalMax %} bgcolor=#32cd32 {% else %} bgcolor=#D7310C {% endif %}> {{ testOld.totalMax }} | {{ testNew.totalMax }}   </td>
+                        </tr>
+                    </table></td>
+                </td>
+                <td><div ><button id="btn" class="btn btn-info" onclick=info("test") value="+" >+</button></div></td>
+            </tr>
+        </tbody>
+    </table>
+    {% else %}
+        <h4 class="page-header">Brak testów</h4>
+    {% endif %}
+
+    <h2 class="page-header">Historia</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Data</th>
+            <th>Info</th>
+        </tr>
+        </thead>
+        <tbody>
         {% for test in tests %}
             <tr>
                 <th scope="row">{{ test.id }}</th>
-                <td>{{ test.adress }}</td>
                 <td>{{ test.date|date('F j, Y, g:i a')}}</td>
                 <td style="display: none;" id="{{ test.id }}">{{ test.ab| raw }}</td>
                 <td><div ><button id="btn{{ test.id }}" class="btn btn-info" onclick=info({{ test.id }}) value="+" >+</button></div></td>

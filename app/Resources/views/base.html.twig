@@ -41,12 +41,21 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/stress/web/app_dev.php/stress">Stress test</a>
+            {% if tests is defined %}
+            <a class="navbar-brand" href="../stress">Stress test</a>
+            {% else %}
+            <a class="navbar-brand" href="stress">Stress test</a>
+            {% endif %}
         </div>
         <div id="navbar" class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
+                {% if tests is defined %}
+                <li class="active"><a href="../stress">Home</a></li>
+                <li class="active"><a href="../create">Dodaj stronę</a></li>
+                {% else %}
                 <li class="active"><a href="stress">Home</a></li>
                 <li class="active"><a href="create">Dodaj stronę</a></li>
+                {% endif %}
             </ul>
         </div><!--/.nav-collapse -->
     </div>

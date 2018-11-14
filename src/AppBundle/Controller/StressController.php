@@ -95,10 +95,12 @@ class StressController extends Controller
         $query = $em->createQuery(
             'SELECT t
              FROM AppBundle:Test t
-            WHERE t.adress = :adress'
+            WHERE t.adress = :adress
+            ORDER BY t.id DESC'
         )->setParameter('adress', $adress);
 
-        $tests_result=$query->getResult();
+        $tests_result=$query
+            ->getResult();
 
         return $this->render('stress/details.html.twig',array(
             'tests' => $tests_result
@@ -111,11 +113,28 @@ class StressController extends Controller
      */
     public function deleteAction($id)
     {
+
+        $page = $this->getDoctrine()
+            ->getRepository('AppBundle:Stress')
+            ->find($id);
+        $adress= $page->getAdress();
+
+
         $em = $this->getDoctrine()->getManager();
+        $tests = $em->getRepository('AppBundle:Test')->findBy(array('adress' => $adress));
+
+        foreach ($tests as $test)
+        {
+            $em->remove($test);
+            $em->flush();
+        }
+
         $page = $em->getRepository('AppBundle:Stress')->find($id);
 
         $em->remove($page);
         $em->flush();
+
+
 
         $this->addFlash(
             'notice',
@@ -130,6 +149,7 @@ class StressController extends Controller
      */
     public function testAction($adress)
     {
+        //komenda w shellu którą używamy narzędzia ab parametr -n(liczba tetów) -c(ile testów na zapytanie) -w(parametr wskazujący na to, żebyśmy otrzymali zwrotkę w postaci tabeli HTML)
         $output = shell_exec('\xampp\apache\bin\ab.exe -n 10 -c 2 -w http://'.$adress.'/');
         $output = str_replace("<p>", '', $output);
         $output = str_replace("This is ApacheBench, Version 2.3 <i>&lt;\$Revision: 1757674 \$&gt;</i><br>", '', $output);
@@ -137,17 +157,108 @@ class StressController extends Controller
         $output = str_replace("Licensed to The Apache Software Foundation, http://www.apache.org/<br>", '', $output);
         $output = str_replace("</p>", '', $output);
         $output = str_replace("..done", '', $output);
-        //die($output);
-        $output = trim($output);
 
+
+        $das=trim($output);
+        // trim usuwa białę znaki
+        $das =str_replace("<table >",' ',$das);
+        $das =str_replace("</table>",' ',$das);
+        $das=str_replace("colspan=2 ",'',$das);
+        $das=str_replace("bgcolor=white",'',$das);
+        $das=str_replace("colspan=4",'',$das);
+        $das=str_replace("</th><td >",'',$das);
+        $das=str_replace("<tr ><th >",'|',$das);
+        $das=str_replace("</td></tr>",'',$das);
+        $das=str_replace("</td><td",'',$das);
+        $das1=explode('|',$das);
+        //funkcją str_replace odcinamy od zwrotki z apache bench to czego nie chcemy
+        $ilosc = count($das1);
+        echo $ilosc."<br>";
+
+        //odzeilenie zmiennych związanych z czasem
+        $timeVariables=array();
+        for($i=0;$i<4;$i++)
+            $timeVariables[$i]=$das1[$ilosc-4+$i];
+
+        //usunięcie ich z głównego stringa
+        for($i = $ilosc-4;$i<$ilosc;$i++)
+            unset($das1[$i]);
+
+
+        //zmienne do dodania do bazy
+        //za pomocą funkcji explode oddzielenie wartości
+        $DocumentLength=explode( " ",explode(":",$das1[5])[1] )[0];
+        $Timetakenfortests=explode( " ",explode(":",$das1[7])[1] )[0];
+        $Completerequests=trim(explode(":",$das1[8])[1]);
+        $Failedrequests=str_replace('<tr ><td >','', trim(explode(":",$das1[9])[1]));
+        if($ilosc==18) {
+            $Totaltransferred =trim(explode(" ",explode(":", $das1[10])[1])[0]);
+            $HTMLtransferred = explode(":", $das1[11])[1];
+            $Requestspersecond = trim(explode(":", $das1[12])[1]);
+            $Transferrate = explode(" ", explode(":", $das1[13])[1])[0];
+            $Non2xxresponses = 0;
+        }else
+        {
+            $Non2xxresponses =trim(explode(":", $das1[10])[1]);
+            $Totaltransferred = trim(explode(" ",explode(":", $das1[11])[1])[0]);
+            $HTMLtransferred = explode(":", $das1[12])[1];
+            $Requestspersecond = trim(explode(":", $das1[13])[1]);
+            $Transferrate = explode(" ", explode(":", $das1[14])[1])[0];
+        }
+
+
+
+        $connect=$timeVariables[1];
+        $connect=explode(":", $connect);
+        $connect=preg_split('/\s+/', $connect[1]);
+
+        $connectMin=$connect[1];
+        $connectAvg=$connect[3];
+        $connectMax=$connect[5];
+
+        $processing=$timeVariables[2];
+        $processing=explode(":", $processing);
+        $processing=preg_split('/\s+/', $processing[1]);
+
+        $processingMin=$processing[1];
+        $processingAvg=$processing[3];
+        $processingMax=$processing[5];
+
+
+        $total=$timeVariables[3];
+        $total=explode(":", $total);
+        $total=preg_split('/\s+/', $total[1]);
+
+        $totalMin=$total[1];
+        $totalAvg=$total[3];
+        $totalMax=$total[5];
+
+
+        //dodanie zmiennych do bazy danch
         $date = new\DateTime('now');
-
         $test  = new Test();
-
         $test
             ->setAdress($adress)
-            ->setAb($output)
-            ->setDate($date);
+            ->setAb(trim($output))
+            ->setDate($date)
+            ->setDocumentLength($DocumentLength)
+            ->setTimetakenfortests($Timetakenfortests)
+            ->setCompleterequests($Completerequests)
+            ->setFailedrequests($Failedrequests)
+            ->setTotaltransferred($Totaltransferred)
+            ->setHTMLtransferred(explode(" ",$HTMLtransferred)[0])
+            ->setNon2xxresponses($Non2xxresponses)
+            ->setRequestspersecond($Requestspersecond)
+            ->setTransferrate($Transferrate)
+            ->setConnectMin($connectMin)
+            ->setConnectAvg($connectAvg)
+            ->setConnectMax($connectMax)
+            ->setProcessingMin($processingMin)
+            ->setProcessingAvg($processingAvg)
+            ->setProcessingMax($processingMax)
+            ->setTotalMin($totalMin)
+            ->setTotalAvg($totalAvg)
+            ->setTotalMax($totalMax);
 
         $em = $this->getDoctrine()->getManager();
 
